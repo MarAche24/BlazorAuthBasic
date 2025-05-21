@@ -29,13 +29,28 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentityCore<ApplicationUser>()
+builder.Services.AddIdentityCore<ApplicationUser>(options =>
+    {
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 5;
+        options.Password.RequireDigit = true;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+
+        // password can consist of only numbers now
+    })
     .AddRoles<IdentityRole>() // this needs to be first to work correctly
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager();
     //.AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+builder.Services
+    .Configure<PasswordHasherOptions>(options =>
+    {
+        options.IterationCount = 11043;
+    });
 
 var app = builder.Build();
 
